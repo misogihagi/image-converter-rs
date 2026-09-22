@@ -1,0 +1,12 @@
+[package]
+name = "image-converter-cli"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "image-converter"
+path = "src/main.rs"
+
+[dependencies]
+image-converter-core = { path = "../core" }
+clap = { version = "4", features = ["derive"] }
