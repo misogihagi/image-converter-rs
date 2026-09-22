@@ -1,3 +1,4 @@
 fn main() {
-    println!("Hello, world!");
+    // heic クレートの要素をテスト
+    let _ = heic::HeicFile::read;
 }
