@@ -37,3 +37,15 @@ fn decode_heic(bytes: &[u8]) -> Result<DynamicImage, Box<dyn std::error::Error>>
     Ok(DynamicImage::ImageRgba8(img_buf))
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_decode_invalid_bytes() {
+        let invalid_bytes = vec![0, 1, 2, 3, 4, 5];
+        let result = decode_heic(&invalid_bytes);
+        assert!(result.is_err());
+    }
+}
+
