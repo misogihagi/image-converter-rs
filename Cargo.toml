@@ -1,10 +1,7 @@
-[package]
-name = "image-converter-rs"
-version = "0.1.0"
-edition = "2021"
-
-[dependencies]
-image = "0.25"
-heic = { git = "https://github.com/imazen/heic", features = ["backend-rust"] }
-
-
+[workspace]
+members = [
+    "crates/core",
+    "crates/cli",
+    "crates/wasm",
+]
+resolver = "2"
