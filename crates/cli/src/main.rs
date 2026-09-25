@@ -1,51 +1,48 @@
-use std::env;
 use std::fs;
-use image::{DynamicImage, RgbaImage};
-use heic::{DecoderConfig, PixelLayout};
+use std::path::PathBuf;
+use clap::Parser;
+use image_converter_core::{convert_image, OutputFormat};
+
+#[derive(Parser, Debug)]
+#[command(author, version, about = "Pure Rust image converter CLI (HEIC, PNG, JPEG, WebP, etc.)")]
+struct Args {
+    /// Input file path
+    input: PathBuf,
+
+    /// Output file path
+    #[arg(short, long)]
+    output: PathBuf,
+
+    /// Output format (png, jpg, webp, bmp, tiff). Inferred from output extension if omitted.
+    #[arg(short, long)]
+    format: Option<String>,
+}
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let args: Vec<String> = env::args().collect();
-    if args.len() < 3 {
-        println!("Usage: image-converter-rs <input.heic> <output.png>");
-        return Ok(());
-    }
+    let args = Args::parse();
 
-    let input_path = &args[1];
-    let output_path = &args[2];
+    let output_format = if let Some(fmt_str) = &args.format {
+        OutputFormat::from_extension(fmt_str)
+            .ok_or_else(|| format!("Unsupported format: {}", fmt_str))?
+    } else {
+        let ext = args
+            .output
+            .extension()
+            .and_then(|s| s.to_str())
+            .ok_or("Could not infer output format from extension")?;
+        OutputFormat::from_extension(ext)
+            .ok_or_else(|| format!("Unsupported extension: {}", ext))?
+    };
 
-    println!("Reading HEIC file: {}", input_path);
-    let bytes = fs::read(input_path)?;
+    println!("Reading input file: {}", args.input.display());
+    let input_bytes = fs::read(&args.input)?;
 
-    println!("Decoding HEIC...");
-    let dynamic_img = decode_heic(&bytes)?;
+    println!("Converting image...");
+    let converted_bytes = convert_image(&input_bytes, output_format)?;
 
-    println!("Saving to PNG: {}", output_path);
-    dynamic_img.save(output_path)?;
+    println!("Writing output file: {}", args.output.display());
+    fs::write(&args.output, converted_bytes)?;
 
-    println!("Successfully converted {} to {}", input_path, output_path);
+    println!("Successfully converted!");
     Ok(())
 }
-
-fn decode_heic(bytes: &[u8]) -> Result<DynamicImage, Box<dyn std::error::Error>> {
-    let output = DecoderConfig::new()
-        .decode(bytes, PixelLayout::Rgba8)
-        .map_err(|e| format!("HEIC decode error: {:?}", e))?;
-
-    let img_buf = RgbaImage::from_raw(output.width, output.height, output.data)
-        .ok_or("Failed to create RgbaImage buffer")?;
-
-    Ok(DynamicImage::ImageRgba8(img_buf))
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_decode_invalid_bytes() {
-        let invalid_bytes = vec![0, 1, 2, 3, 4, 5];
-        let result = decode_heic(&invalid_bytes);
-        assert!(result.is_err());
-    }
-}
-
