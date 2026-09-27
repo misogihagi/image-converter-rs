@@ -67,3 +67,49 @@ pub fn decode_heic(bytes: &[u8]) -> Result<DynamicImage, ConvertError> {
 
     Ok(DynamicImage::ImageRgba8(img_buf))
 }
+
+pub fn decode_image(bytes: &[u8]) -> Result<DynamicImage, ConvertError> {
+    if is_heic(bytes) {
+        decode_heic(bytes)
+    } else {
+        let img = image::load_from_memory(bytes)?;
+        Ok(img)
+    }
+}
+
+pub fn convert_image(
+    input_bytes: &[u8],
+    output_format: OutputFormat,
+) -> Result<Vec<u8>, ConvertError> {
+    let img = decode_image(input_bytes)?;
+    let mut buffer = Vec::new();
+    let mut cursor = Cursor::new(&mut buffer);
+
+    img.write_to(&mut cursor, output_format.to_image_format())
+        .map_err(|e| ConvertError::EncodeError(e.to_string()))?;
+
+    Ok(buffer)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_is_heic_invalid() {
+        assert!(!is_heic(b"not a heic file"));
+    }
+
+    #[test]
+    fn test_decode_invalid_heic() {
+        let res = decode_heic(b"invalid heic data");
+        assert!(res.is_err());
+    }
+
+    #[test]
+    fn test_output_format_extension() {
+        assert_eq!(OutputFormat::from_extension("png"), Some(OutputFormat::Png));
+        assert_eq!(OutputFormat::from_extension("jpg"), Some(OutputFormat::Jpeg));
+        assert_eq!(OutputFormat::from_extension("HEIC"), None);
+    }
+}
