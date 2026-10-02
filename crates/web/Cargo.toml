@@ -1,16 +1,9 @@
-[workspace]
-resolver = "2"
-members = [
-    "packages/ui",
-    "packages/web",
-    "packages/desktop",
-    "packages/mobile",
-    "packages/api",
-]
+[package]
+name = "image-converter-web"
+version = "0.1.0"
+edition = "2021"
 
-[workspace.dependencies]
-dioxus = { version = "0.7.1" }
-
-# workspace
-ui = { path = "packages/ui" }
-api = { path = "packages/api" }
+[dependencies]
+dioxus = { version = "0.7.1", features = ["web"] }
+image-converter-core = { path = "../core" }
+base64 = "0.22"

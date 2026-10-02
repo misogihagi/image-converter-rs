@@ -1,0 +1,10 @@
+[application]
+name = "image-converter-web"
+default_platform = "web"
+
+[web.app]
+title = "image-converter-rs"
+
+[web.watcher]
+reload_html = true
+watch_path = ["src", "assets"]
