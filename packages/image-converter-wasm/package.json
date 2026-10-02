@@ -1,0 +1,53 @@
+{
+  "name": "image-converter-wasm",
+  "version": "0.1.0",
+  "description": "Pure Rust image converter WebAssembly bindings (HEIC, JPEG, PNG, WebP, BMP, TIFF)",
+  "keywords": [
+    "wasm",
+    "webassembly",
+    "heic",
+    "heif",
+    "image-converter",
+    "jpeg",
+    "png",
+    "webp"
+  ],
+  "author": "misogihagi",
+  "license": "MIT OR Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/misogihagi/image-converter-rs.git"
+  },
+  "main": "./dist/node/image_converter_wasm.js",
+  "module": "./browser.js",
+  "browser": "./browser.js",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "browser": "./browser.js",
+      "node": {
+        "import": "./dist/node/image_converter_wasm.js",
+        "require": "./dist/node/image_converter_wasm.js"
+      },
+      "default": "./browser.js"
+    },
+    "./node": {
+      "types": "./index.d.ts",
+      "import": "./dist/node/image_converter_wasm.js",
+      "require": "./dist/node/image_converter_wasm.js"
+    },
+    "./web": {
+      "types": "./dist/web/image_converter_wasm.d.ts",
+      "import": "./dist/web/image_converter_wasm.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "browser.js",
+    "index.js",
+    "index.d.ts",
+    "README.md"
+  ]
+}
