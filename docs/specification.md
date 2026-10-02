@@ -162,13 +162,13 @@ pub enum ConvertError {
 
 ```bash
 # 基本的な変換
-image-converter input.heic -o output.jpg
+image-converter input.heic output.jpg
 
 # フォーマット明示指定
-image-converter input.heic -o output -f png
+image-converter input.heic output -f png
 
 # 品質指定（JPEG/WebP）
-image-converter input.heic -o output.jpg --quality 85
+image-converter input.heic output.jpg --quality 85
 ```
 
 #### 5.2.2 CLI 引数
@@ -176,7 +176,7 @@ image-converter input.heic -o output.jpg --quality 85
 | 引数 | 短縮 | 必須 | 説明 |
 |------|------|------|------|
 | `<INPUT>` | — | ✅ | 入力ファイルパス |
-| `--output` | `-o` | ✅ | 出力ファイルパス |
+| `<OUTPUT>` | — | ✅ | 出力ファイルパス |
 | `--format` | `-f` | ❌ | 出力フォーマット（`jpeg`, `png`, `webp`, `bmp`, `tiff`）。省略時は出力ファイルの拡張子から推定 |
 | `--quality` | `-q` | ❌ | 品質 (1–100)。JPEG/WebP のみ有効。デフォルト: `85` |
 | `--help` | `-h` | — | ヘルプ表示 |

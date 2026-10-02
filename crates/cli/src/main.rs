@@ -10,7 +10,6 @@ struct Args {
     input: PathBuf,
 
     /// Output file path
-    #[arg(short, long)]
     output: PathBuf,
 
     /// Output format (png, jpg, webp, bmp, tiff). Inferred from output extension if omitted.
