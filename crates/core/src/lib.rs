@@ -1,6 +1,6 @@
-use std::io::Cursor;
-use image::{DynamicImage, ImageFormat, RgbaImage};
 use heic::{DecoderConfig, PixelLayout};
+use image::{DynamicImage, ImageFormat, RgbaImage};
+use std::io::Cursor;
 use thiserror::Error;
 
 #[derive(Error, Debug)]
@@ -77,6 +77,22 @@ pub fn decode_image(bytes: &[u8]) -> Result<DynamicImage, ConvertError> {
     }
 }
 
+pub fn detect_format(bytes: &[u8]) -> Result<&'static str, ConvertError> {
+    if is_heic(bytes) {
+        return Ok("heic");
+    }
+    let format = image::guess_format(bytes).map_err(|_| ConvertError::UnsupportedFormat)?;
+    match format {
+        ImageFormat::Png => Ok("png"),
+        ImageFormat::Jpeg => Ok("jpeg"),
+        ImageFormat::WebP => Ok("webp"),
+        ImageFormat::Bmp => Ok("bmp"),
+        ImageFormat::Tiff => Ok("tiff"),
+        ImageFormat::Gif => Ok("gif"),
+        _ => Err(ConvertError::UnsupportedFormat),
+    }
+}
+
 pub fn convert_image(
     input_bytes: &[u8],
     output_format: OutputFormat,
@@ -101,6 +117,12 @@ mod tests {
     }
 
     #[test]
+    fn test_is_heic_valid() {
+        let fake_heic = [0, 0, 0, 20, b'f', b't', b'y', b'p', b'h', b'e', b'i', b'c'];
+        assert!(is_heic(&fake_heic));
+    }
+
+    #[test]
     fn test_decode_invalid_heic() {
         let res = decode_heic(b"invalid heic data");
         assert!(res.is_err());
@@ -109,7 +131,26 @@ mod tests {
     #[test]
     fn test_output_format_extension() {
         assert_eq!(OutputFormat::from_extension("png"), Some(OutputFormat::Png));
-        assert_eq!(OutputFormat::from_extension("jpg"), Some(OutputFormat::Jpeg));
+        assert_eq!(
+            OutputFormat::from_extension("jpg"),
+            Some(OutputFormat::Jpeg)
+        );
         assert_eq!(OutputFormat::from_extension("HEIC"), None);
+    }
+
+    #[test]
+    fn test_detect_format() {
+        let fake_heic = [0, 0, 0, 20, b'f', b't', b'y', b'p', b'h', b'e', b'i', b'c'];
+        assert_eq!(detect_format(&fake_heic).unwrap(), "heic");
+
+        let fake_png = [0x89, b'P', b'N', b'G', 0x0D, 0x0A, 0x1A, 0x0A];
+        assert_eq!(detect_format(&fake_png).unwrap(), "png");
+
+        let fake_jpeg = [
+            0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10, b'J', b'F', b'I', b'F', 0x00,
+        ];
+        assert_eq!(detect_format(&fake_jpeg).unwrap(), "jpeg");
+
+        assert!(detect_format(b"unknown data").is_err());
     }
 }
