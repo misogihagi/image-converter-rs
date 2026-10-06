@@ -56,11 +56,14 @@ C 言語の外部ライブラリ（`libheif` 等）に依存しないため、�
 
 ### 4.1 プロジェクト構成
 
-Cargo ワークスペースにより、コアロジックと各インターフェースを分離する。
+Cargo ワークスペースおよび npm パッケージ構造により、コアロジック、各インターフェース、ビルドスクリプト、CI 設定を分離する。
 
 ```text
 image-converter-rs/
 ├── Cargo.toml              # ワークスペースルート
+├── package.json            # ルート npm 設定・ビルドスクリプト
+├── scripts/
+│   └── build-package.mjs   # WASM Universal パッケージビルドスクリプト
 ├── crates/
 │   ├── core/               # 共通の変換ロジック
 │   │   ├── Cargo.toml
@@ -74,9 +77,19 @@ image-converter-rs/
 │       ├── Cargo.toml
 │       └── src/
 │           └── lib.rs
-├── examples/               # Wasm Web デモページ
-│   ├── index.html
-│   └── index.js
+├── packages/
+│   └── image-converter-wasm/ # npm パッケージ（Node.js / Browser Universal）
+│       ├── package.json
+│       ├── index.d.ts      # TypeScript 型定義
+│       ├── browser.js      # ブラウザ向けエントリポイント
+│       ├── index.js        # Node.js 向けエントリポイント
+│       └── dist/           # ビルド生成物 (node / web)
+├── examples/
+│   ├── node/               # Node.js での画像変換利用例
+│   │   └── convert.mjs
+│   └── web/                # Wasm Web デモページ (HTML/JS)
+│       ├── index.html
+│       └── index.js
 └── docs/
     └── specification.md    # 本仕様書
 ```
@@ -189,45 +202,64 @@ image-converter input.heic output.jpg --quality 85
 | `clap` | CLI 引数パーサ（derive マクロ使用） |
 | `image-converter-core` | 変換ロジック |
 
-### 5.3 `wasm` クレート
+### 5.3 `wasm` クレート & npm パッケージ
 
-WebAssembly 向けのインターフェース。`wasm-bindgen` を用いてJavaScript から呼び出し可能にする。
+WebAssembly 向けのインターフェースおよび JavaScript / TypeScript 向け npm パッケージ。`wasm-bindgen` を用いて、ブラウザと Node.js の双方から直接利用可能にする。
 
-#### 5.3.1 公開 API（JavaScript 側）
+#### 5.3.1 公開 API（JavaScript / TypeScript 側）
 
 ```typescript
 /**
  * 画像バイト列を変換して返す
- * @param input - 入力画像の Uint8Array
+ * @param inputBytes - 入力画像の Uint8Array
  * @param format - 出力フォーマット ("jpeg" | "png" | "webp" | "bmp" | "tiff")
- * @param quality - 品質 (1–100, 省略可)
  * @returns 変換後の Uint8Array
  */
-export function convert(input: Uint8Array, format: string, quality?: number): Uint8Array;
+export function convert(inputBytes: Uint8Array, format: string): Uint8Array;
 
 /**
- * 入力画像のフォーマットを推定する
- * @param input - 入力画像の Uint8Array
- * @returns フォーマット名の文字列
+ * 入力画像のフォーマットを自動判定する
+ * @param inputBytes - 入力画像の Uint8Array
+ * @returns フォーマット名 ("heic" | "jpeg" | "png" | "webp" | "bmp" | "tiff" | "gif")
  */
-export function detect_format(input: Uint8Array): string;
+export function detect_format(inputBytes: Uint8Array): string;
+
+/**
+ * 入力画像が HEIC/HEIF 形式であるかを判定する
+ * @param inputBytes - 入力画像の Uint8Array
+ * @returns HEIC/HEIF の場合は true、それ以外は false
+ */
+export function is_heic(inputBytes: Uint8Array): boolean;
+
+/**
+ * （ブラウザ環境用）WebAssembly モジュールを非同期に初期化する
+ * Node.js 環境では自動ロードされるため呼び出しは不要
+ */
+export default function init(moduleOrPath?: any): Promise<any>;
 ```
 
 #### 5.3.2 ビルド & パッケージング
 
+Node.js（CommonJS/ESM）とブラウザ（Bundler/Vanilla ESM）の両環境に対応するため、`packages/image-converter-wasm` に Universal npm パッケージ構成を採用している。
+
 | ターゲット | ツール | 出力先 | 用途 |
 |-----------|--------|--------|------|
-| `bundler` | `wasm-pack build --target bundler` | `pkg/` | npm パッケージ（Webpack/Vite 等） |
-| `web` | `wasm-pack build --target web` | `pkg/` | ブラウザ直接読み込み |
-| `nodejs` | `wasm-pack build --target nodejs` | `pkg/` | Node.js |
+| `nodejs` | `wasm-pack build --target nodejs` | `packages/image-converter-wasm/dist/node/` | Node.js 環境（WASM を同期ファイルロード） |
+| `web` | `wasm-pack build --target web` | `packages/image-converter-wasm/dist/web/` | ブラウザ / Vite / Webpack（`init()` で非同期ロード） |
+
+一括ビルドコマンド:
+```bash
+npm run build
+# (内部で scripts/build-package.mjs を実行し、上記 2 ターゲットを生成)
+```
+
+`package.json` の `exports` フィールドにより、実行環境（Node.js かブラウザか）に応じて適切なエントリポイントおよび型定義が自動選択される。
 
 #### 5.3.3 依存クレート
 
 | クレート | 用途 |
 |---------|------|
 | `wasm-bindgen` | JS ↔ Wasm バインディング |
-| `js-sys` | JavaScript 型の利用 |
-| `web-sys` | （必要に応じて）Web API アクセス |
 | `image-converter-core` | 変換ロジック |
 
 ---
