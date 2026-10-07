@@ -60,6 +60,9 @@ Cargo ワークスペースおよび npm パッケージ構造により、コア
 
 ```text
 image-converter-rs/
+├── .github/
+│   └── workflows/
+│       └── ci.yml          # GitHub Actions CI 設定
 ├── Cargo.toml              # ワークスペースルート
 ├── package.json            # ルート npm 設定・ビルドスクリプト
 ├── scripts/
@@ -306,13 +309,27 @@ npm run test:node
   - フォーマット自動判定のテスト
   - 不正な入力に対するエラーハンドリング
 
-### 7.2 CI
+### 7.2 CI（GitHub Actions）
 
-- GitHub Actions で以下を実行:
-  - `cargo test` （ネイティブ）
-  - `cargo clippy`
-  - `cargo fmt --check`
-  - `wasm-pack test --headless --chrome` （Wasm）
+`.github/workflows/ci.yml` により、`main` ブランチへの push / Pull Request 時に自動テストを実行する。
+
+```mermaid
+flowchart TD
+    Push["Git Push / PR"] --> RustJob["rust-check ジョブ"]
+    Push --> WasmJob["wasm-check ジョブ"]
+    RustJob --> Fmt["cargo fmt --check"]
+    RustJob --> Clippy["cargo clippy -- -D warnings"]
+    RustJob --> RustTest["cargo test --all"]
+    WasmJob --> Setup["wasm32 target + Node 20"]
+    WasmJob --> WasmBuild["npm run build"]
+    WasmJob --> NodeTest["npm run test:node"]
+```
+
+| ジョブ名 | 実行環境 | 内容 |
+|---------|----------|------|
+| `rust-check` | `ubuntu-latest` | `cargo fmt --check`, `cargo clippy`, `cargo test --all` |
+| `wasm-check` | `ubuntu-latest` | `wasm32-unknown-unknown` + Node.js 20 での `npm run build` および `npm run test:node` |
+
 
 ---
 
