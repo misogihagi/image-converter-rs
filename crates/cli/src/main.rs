@@ -1,10 +1,14 @@
-use std::fs;
-use std::path::PathBuf;
 use clap::Parser;
 use image_converter_core::{convert_image, OutputFormat};
+use std::fs;
+use std::path::PathBuf;
 
 #[derive(Parser, Debug)]
-#[command(author, version, about = "Pure Rust image converter CLI (HEIC, PNG, JPEG, WebP, etc.)")]
+#[command(
+    author,
+    version,
+    about = "Pure Rust image converter CLI (HEIC, PNG, JPEG, WebP, etc.)"
+)]
 struct Args {
     /// Input file path
     input: PathBuf,

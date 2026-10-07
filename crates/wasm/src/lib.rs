@@ -8,8 +8,7 @@ pub fn convert(input_bytes: &[u8], format: &str) -> Result<Vec<u8>, JsValue> {
     let output_format = OutputFormat::from_extension(format)
         .ok_or_else(|| JsValue::from_str(&format!("Unsupported format: {}", format)))?;
 
-    convert_image(input_bytes, output_format)
-        .map_err(|e| JsValue::from_str(&e.to_string()))
+    convert_image(input_bytes, output_format).map_err(|e| JsValue::from_str(&e.to_string()))
 }
 
 #[wasm_bindgen]

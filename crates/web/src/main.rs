@@ -1,6 +1,6 @@
-use dioxus::prelude::*;
 use base64::engine::general_purpose::STANDARD as BASE64;
 use base64::Engine;
+use dioxus::prelude::*;
 use image_converter_core::{convert_image, OutputFormat};
 
 const MAIN_CSS: Asset = asset!("/assets/main.css");
@@ -49,7 +49,7 @@ impl TargetFormat {
         }
     }
 
-    fn to_output_format(&self) -> OutputFormat {
+    fn to_output_format(self) -> OutputFormat {
         match self {
             Self::Png => OutputFormat::Png,
             Self::Jpeg => OutputFormat::Jpeg,
