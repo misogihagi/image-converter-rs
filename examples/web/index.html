@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>image-converter-wasm Browser Demo</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 0 20px;
+      line-height: 1.6;
+      color: #333;
+    }
+    h1 {
+      border-bottom: 2px solid #eaeaea;
+      padding-bottom: 12px;
+    }
+    .card {
+      background: #fafafa;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    .form-group {
+      margin-bottom: 16px;
+    }
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    select, input[type="file"], button {
+      font-size: 1rem;
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background-color: #0969da;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background-color 0.2s;
+    }
+    button:hover:not(:disabled) {
+      background-color: #0856b3;
+    }
+    button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+    .info-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: bold;
+      background: #e1f5fe;
+      color: #0277bd;
+      margin-top: 8px;
+    }
+    .preview-container {
+      margin-top: 24px;
+      text-align: center;
+    }
+    img.preview {
+      max-width: 100%;
+      max-height: 400px;
+      border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      margin-bottom: 12px;
+    }
+    .status {
+      margin-top: 12px;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+  <h1>Pure Rust Image Converter (WASM)</h1>
+  <p>外部サーバーに送信せず、ブラウザ（WebAssembly）上で直接 HEIC / JPEG / PNG などを変換します。</p>
+
+  <div class="card">
+    <div class="form-group">
+      <label for="fileInput">画像ファイルを選択 (HEIC, JPEG, PNG, etc.):</label>
+      <input type="file" id="fileInput" accept=".heic,.heif,.jpg,.jpeg,.png,.webp,.bmp,.tiff">
+      <div id="fileInfo" class="info-badge" style="display: none;"></div>
+    </div>
+
+    <div class="form-group">
+      <label for="formatSelect">変換先フォーマット:</label>
+      <select id="formatSelect">
+        <option value="jpeg">JPEG (.jpg)</option>
+        <option value="png">PNG (.png)</option>
+        <option value="webp">WebP (.webp)</option>
+        <option value="bmp">BMP (.bmp)</option>
+        <option value="tiff">TIFF (.tiff)</option>
+      </select>
+    </div>
+
+    <button id="convertBtn" disabled>WASM で変換実行</button>
+    <div id="status" class="status"></div>
+  </div>
+
+  <div id="resultCard" class="card preview-container" style="display: none;">
+    <h3>変換結果プレビュー</h3>
+    <img id="previewImage" class="preview" alt="変換プレビュー">
+    <div>
+      <a id="downloadLink" download="converted-image" class="button" style="text-decoration: none;">
+        <button type="button">変換後画像をダウンロード</button>
+      </a>
+    </div>
+  </div>
+
+  <script type="module" src="./index.js"></script>
+</body>
+</html>
