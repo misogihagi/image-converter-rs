@@ -2,6 +2,9 @@
 name = "image-converter-wasm"
 version = "0.1.0"
 edition = "2021"
+description = "Pure Rust image converter WebAssembly bindings (HEIC, JPEG, PNG, WebP, etc.)"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/misogihagi/image-converter-rs"
 
 [lib]
 crate-type = ["cdylib", "rlib"]
