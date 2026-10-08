@@ -301,12 +301,11 @@ npm run test:node
 
 ### 7.1 ユニットテスト
 
-- `core`: 各フォーマットの変換が正しく動作すること
 - `core`: 各フォーマットの判定および変換が正しく動作すること
   - HEIC → JPEG / PNG / WebP
   - JPEG → PNG / WebP
   - PNG → JPEG / WebP
-  - フォーマット自動判定のテスト
+  - フォーマット自動判定（`detect_format`）のテスト
   - 不正な入力に対するエラーハンドリング
 
 ### 7.2 CI（GitHub Actions）
