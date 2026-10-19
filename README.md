@@ -19,8 +19,56 @@ Cargo ワークスペースを利用して、コアロジックと各インタ�
 ```text
 image-converter-rs/
 ├── Cargo.toml          # ワークスペース管理
+├── package.json        # ルート npm 設定・ビルドスクリプト
 ├── crates/
 │   ├── core/           # 共通の変換ロジック（imazen/heic のラップ）
 │   ├── cli/            # CLI インターフェース実装
 │   └── wasm/           # wasm-bindgen を用いた WebAssembly インターフェース
-└── examples/           # Webブラウザ（Wasm Web）での利用例（HTML/JS）
+├── packages/
+│   └── image-converter-wasm/  # JavaScript / TypeScript 向け npm パッケージ
+├── examples/
+│   ├── node/           # Node.js での利用例 (convert.mjs)
+│   └── web/            # ブラウザでの利用例 (index.html, index.js)
+└── docs/
+    └── specification.md # 仕様書
+```
+
+## 📦 WebAssembly (JavaScript / TypeScript) パッケージ
+
+### ビルド
+
+```bash
+# 全体ビルド（Node.js 向け + Web 向けの Universal パッケージ生成）
+npm run build
+
+# Node.js 動作テスト
+npm run test:node
+```
+
+### Node.js での利用例
+
+```javascript
+import fs from "node:fs";
+import { convert, detect_format, is_heic } from "image-converter-wasm";
+
+const buffer = fs.readFileSync("photo.heic");
+console.log("Format:", detect_format(buffer)); // "heic"
+
+const jpegBytes = convert(buffer, "jpeg");
+fs.writeFileSync("output.jpg", jpegBytes);
+```
+
+### ブラウザ（Vite / Webpack / Vanilla）での利用例
+
+```javascript
+import init, { convert, detect_format } from "image-converter-wasm";
+
+await init(); // WebAssembly モジュールの初期化
+
+const res = await fetch("/photo.heic");
+const buffer = new Uint8Array(await res.arrayBuffer());
+
+const pngBytes = convert(buffer, "png");
+const blob = new Blob([pngBytes], { type: "image/png" });
+const url = URL.createObjectURL(blob);
+```
