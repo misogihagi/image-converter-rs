@@ -9,7 +9,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const rootDir = path.resolve(__dirname, "../..");
 
-const inputPath = path.join(rootDir, "IMG_0383.HEIC");
+const inputPath = path.join(rootDir, "lenna.heic");
 const outputJpgPath = path.join(__dirname, "output.jpg");
 const outputPngPath = path.join(__dirname, "output.png");
 
