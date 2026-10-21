@@ -7,6 +7,7 @@
     "build": "node scripts/build-package.mjs",
     "build:wasm:node": "wasm-pack build crates/wasm --target nodejs --out-dir ../../packages/image-converter-wasm/dist/node",
     "build:wasm:web": "wasm-pack build crates/wasm --target web --out-dir ../../packages/image-converter-wasm/dist/web",
+    "build:web": "node scripts/build-web-example.mjs",
     "test:node": "node examples/node/convert.mjs",
     "test": "npm run build && npm run test:node"
   },
