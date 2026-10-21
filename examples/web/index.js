@@ -1,4 +1,4 @@
-import init, { convert, detect_format, is_heic } from "../../packages/image-converter-wasm/dist/web/image_converter_wasm.js";
+import init, { convert, detect_format, is_heic } from "./dist/web/image_converter_wasm.js";
 
 const fileInput = document.getElementById("fileInput");
 const fileInfo = document.getElementById("fileInfo");
